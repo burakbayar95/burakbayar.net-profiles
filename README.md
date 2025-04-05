@@ -1,13 +1,18 @@
 # Sosyal Medya Bağlantı Sayfası
 
-Bu basit web sayfası, tüm sosyal medya hesaplarınızı tek bir yerde toplamak için tasarlanmıştır. Tasarım modern, sade ve mobil uyumludur.
+Bu web sayfası, tüm sosyal medya hesaplarınızı estetik ve etkileyici bir şekilde tek bir yerde toplayan bir kişisel portfolyo sayfasıdır. Modern, şık ve tamamen responsive bir tasarıma sahiptir.
+
+![Screenshot](profile.jpg)
 
 ## Özellikler
 
-- Mobil öncelikli (responsive) tasarım
-- Platform bağlantıları için şık ve kullanıcı dostu arayüz
-- Mobil cihazlarda uygulamaya doğrudan açılma (deep-linking) özelliği
-- Uygulama yüklü değilse web sürümüne yönlendirme
+- Etkileyici Matrix yağmur animasyonu arka planı
+- Çarpıcı gradyan renk geçişleri ve efektler
+- Platform bağlantıları için parlama animasyonlu şık butonlar
+- Mobil cihazlarda uygulama açma (deep-linking) özelliği
+- Responsive ve mobil uyumlu tasarım
+- Optimum performans için mobil cihaz algılama ve animasyon yavaşlatma
+- Transparan ve blur efektli bileşenler
 - Kolay özelleştirilebilir kod yapısı
 
 ## Nasıl Özelleştirilir?
@@ -15,8 +20,14 @@ Bu basit web sayfası, tüm sosyal medya hesaplarınızı tek bir yerde toplamak
 ### Profil Bilgilerinizi Güncelleyin
 
 1. `index.html` dosyasında:
-   - Başlıktaki adınızı değiştirin: `<h1>Burak BAYAR</h1>`
-   - Bio metninizi değiştirin: `<p class="bio">Kısa bio yazısı burada olacak...</p>`
+   - Profil adınızı değiştirin: `<div class="profile-name">Burak BAYAR</div>`
+   - Bio metninizi düzenleyin: 
+     ```html
+     <div class="bio">
+       <p>Paragraf 1</p>
+       <p>Paragraf 2</p>
+     </div>
+     ```
 
 2. Profil resminizi değiştirmek için:
    - `profile.jpg` dosyasını kendi profil resminizle değiştirin (tercihen kare formatlı bir resim)
@@ -36,13 +47,30 @@ Her sosyal medya platform için `index.html` dosyasında:
 - `data-app-link` özelliğini mobil uygulama bağlantınızla değiştirin
 - `username` içeriğini kendi kullanıcı adınızla değiştirin
 
-### Renk ve Stil Değişiklikleri
+### Animasyon ve Efektleri Özelleştirme
 
-Renkleri ve stilleri değiştirmek için `styles.css` dosyasını düzenleyebilirsiniz:
+#### Matrix Animasyonu
 
-- Arka plan rengini değiştirmek: `body { background-color: #f5f5f5; }`
-- Profil resmi boyutunu değiştirmek: `.profile-picture { width: 120px; height: 120px; }`
-- Platform renklerini değiştirmek: `.instagram { background: linear-gradient(...); }`
+`matrix.js` dosyasını düzenleyerek:
+
+- Animasyon hızını ayarlayabilirsiniz: `drops[i] += isMobile ? 0.8 : 0.6;`
+- Karakter setini değiştirebilirsiniz: `const chars = '01アイウエオカキクケコサシスセソタチツテト...';`
+- Rengi değiştirebilirsiniz: `ctx.fillStyle = 'rgba(0, 255, 0, ${randomOpacity})';`
+
+#### Buton Efektleri
+
+`styles.css` dosyasında:
+
+- Buton parlamasını değiştirebilirsiniz: `.social-link::before { animation: linkSweep 6s ease-in-out infinite; }`
+- Renk geçişlerini düzenleyebilirsiniz: 
+  ```css
+  .instagram {
+    background: linear-gradient(45deg, 
+        rgba(131, 58, 180, 0.4) 20%, 
+        rgba(253, 29, 29, 0.4) 50%, 
+        rgba(252, 176, 69, 0.4) 80%);
+  }
+  ```
 
 ## Yeni Platform Ekleme
 
@@ -59,17 +87,33 @@ Sonra `styles.css` dosyasına yeni platformun stilini ekleyin:
 
 ```css
 .PLATFORM_SINIFI {
-    background-color: #RENK_KODU;
+    background: linear-gradient(45deg, 
+        rgba(R, G, B, 0.4) 20%, 
+        rgba(R, G, B, 0.4) 50%, 
+        rgba(R, G, B, 0.4) 80%);
+    background-size: 300% 300%;
+    animation: gradientAnimation 6s ease infinite;
+    backdrop-filter: blur(3px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 ```
 
 ## Kullanılan Teknolojiler
 
 - HTML5
-- CSS3
-- JavaScript
+- CSS3 (Animasyonlar, Gradyan efektler, Blur efektleri)
+- JavaScript (Canvas API, Mobil algılama)
 - Font Awesome ikonları
 
-## Sayfayı Çalıştırma
+## Performans İpuçları
 
-Dosyaları bir web sunucusuna yükleyerek ya da doğrudan tarayıcıda açarak sayfayı görüntüleyebilirsiniz. 
+Sayfanın performansını iyileştirmek için:
+
+- Matrix animasyonu mobil cihazlarda otomatik olarak optimize edilir
+- Kaydırma sırasında animasyonlar duraklatılır
+- Mobile-first tasarım ilkeleri kullanılmıştır
+- Butonlarda pasif event listener'lar kullanılmıştır
+
+## Lisans
+
+Bu proje MIT Lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakınız. 
