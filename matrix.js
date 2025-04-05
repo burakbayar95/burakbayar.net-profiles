@@ -1,121 +1,115 @@
 // Matrix Rain effect
-document.addEventListener('DOMContentLoaded', function() {
+// Hemen çalışacak fonksiyon
+(function() {
     const canvas = document.getElementById('matrixCanvas');
+    if (!canvas) return; // Canvas yoksa çık
+    
     const ctx = canvas.getContext('2d');
 
     // Check if mobile device
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    // Set canvas dimensions to match window size
+    // Canvas'ı ekranı tamamen kaplamak için ayarla
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.opacity = '1';
+    canvas.style.zIndex = '-1';
+    
+    // Ekran boyutlarına göre canvas ayarla
     function resizeCanvas() {
+        // Tam piksel değerleri için window.innerWidth/Height kullan
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        
-        // Ensure full viewport coverage, especially on mobile
-        if (isMobile) {
-            canvas.style.position = 'fixed';
-            canvas.style.top = '0';
-            canvas.style.left = '0';
-            canvas.style.width = '100vw';
-            canvas.style.height = '100vh';
-            document.body.style.minHeight = '100vh';
-        }
     }
     
+    // Başlangıçta ve her boyut değişiminde yeniden boyutlandır
     resizeCanvas();
 
-    // Characters to use - reduce character set on mobile
-    const chars = isMobile ? '01ハカサナマヤラワ' : '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+    // Karakterler - mobil ve masaüstü için aynı setler
+    const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
     const charArray = chars.split('');
 
-    // Column settings - adjust based on device
+    // Sütun ayarları - tüm ekranı kaplamak için hesapla
     const fontSize = isMobile ? 10 : 14;
-    // Reduce number of columns on mobile for better performance
-    const columnDensity = isMobile ? 0.7 : 1; // 70% density on mobile
-    const columns = Math.floor(canvas.width / fontSize * columnDensity);
+    // Tüm ekranı kaplayacak sütun sayısını hesapla
+    const columns = Math.ceil(window.innerWidth / fontSize);
 
-    // Initialize drops at random positions
+    // Damlaları ekranın üstünden başlat
     const drops = [];
     for (let i = 0; i < columns; i++) {
-        drops[i] = Math.random() * -100;
+        drops[i] = Math.random() * -100; // Ekranın üstünden başlat
     }
 
-    // Set dark green color for matrix effect
-    let alpha = isMobile ? 0.02 : 0.03; // Reduced opacity for the fade effect on mobile
+    // Matrix efekti renk ayarları
+    let alpha = isMobile ? 0.02 : 0.03;
 
-    // For mobile, reduce drawing operation frequency
-    let drawCounter = 0;
-    const skipFrames = isMobile ? 2 : 0; // Skip every 2 frames on mobile
-
+    // Çizim fonksiyonu
     function draw() {
-        // Skip frames on mobile for better performance
-        if (isMobile && drawCounter < skipFrames) {
-            drawCounter++;
-            return;
-        }
-        drawCounter = 0;
-        
-        // Background with opacity for trail effect
+        // Arka plan için opaklıkla doldur
         ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Text properties
+        // Yazı özellikleri
         ctx.font = `${fontSize}px monospace`;
 
-        // Draw each drop
+        // Her damlayı çiz
         for (let i = 0; i < drops.length; i++) {
-            // Skip more columns for performance on mobile
-            if (isMobile && Math.random() > 0.7) continue;
-            
-            // Get random character
+            // Rastgele karakter
             const char = charArray[Math.floor(Math.random() * charArray.length)];
 
-            // Calculate x position
+            // X pozisyonu
             const x = i * fontSize;
             
-            // Calculate y position
+            // Y pozisyonu
             const y = drops[i] * fontSize;
 
-            // Draw character
-            // Vary the opacity based on position to create visual interest
-            const randomOpacity = 0.3 + Math.random() * 0.3;
+            // Karakteri çiz
+            const randomOpacity = 0.3 + Math.random() * 0.5; // Daha parlak görünüm
             ctx.fillStyle = `rgba(0, 255, 0, ${randomOpacity})`;
             ctx.fillText(char, x, y);
 
-            // Reset drop if it reaches bottom or randomly
-            if (y > canvas.height && Math.random() > (isMobile ? 0.988 : 0.975)) {
+            // Ekranın altına gelince veya rastgele sıfırla
+            if (y > canvas.height && Math.random() > 0.98) {
                 drops[i] = 0;
             }
 
-            // Move drop down - further reduced speed
-            drops[i] += 1.0; // Reduced from 1.2 to 1.0
+            // Damlayı aşağı kaydır - daha yavaş hızda
+            drops[i] += isMobile ? 0.8 : 0.6; // Hızı düşürdük
         }
+        
+        // Animasyonu daha yavaş devam ettir
+        setTimeout(function() {
+            requestAnimationFrame(draw);
+        }, isMobile ? 40 : 60); // Frameler arası bekleme süresi
     }
 
-    // Handle window resize
+    // Pencere boyutu değişince canvas'ı yeniden boyutlandır
     window.addEventListener('resize', function() {
+        // Yeniden boyutlandır
         resizeCanvas();
-        // Recalculate columns after resize
-        const newColumns = Math.floor(canvas.width / fontSize * columnDensity);
-        // Adjust drops array length
-        if (newColumns > drops.length) {
-            // Add new drops if window got wider
-            for (let i = drops.length; i < newColumns; i++) {
-                drops.push(Math.random() * -100);
+        
+        // Yeni sütun sayısını hesapla
+        const newColumns = Math.ceil(window.innerWidth / fontSize);
+        
+        // Sütun sayısı değiştiyse damlaları güncelle
+        if (newColumns !== drops.length) {
+            // Damlaları yeniden oluştur
+            drops.length = 0;
+            for (let i = 0; i < newColumns; i++) {
+                drops[i] = Math.random() * -100;
             }
         }
-    });
+    }, { passive: true });
 
-    // Handle orientation change specifically for mobile
+    // Yön değişiminde de boyutu güncelle
     window.addEventListener('orientationchange', function() {
-        setTimeout(resizeCanvas, 100); // Slight delay to ensure correct dimensions
-    });
+        setTimeout(resizeCanvas, 100);
+    }, { passive: true });
 
-    // Animation loop with variable frame rate based on device - slower now
-    setInterval(draw, isMobile ? 80 : 55); // Changed from 70/45 to 80/55 for even slower animation
-
-    // Add flag to pause animation when page is not visible
-    document.addEventListener('visibilitychange', function() {
-        alpha = document.hidden ? 0 : (isMobile ? 0.02 : 0.03);
-    });
-}); 
+    // Animasyonu hemen başlat
+    draw();
+})(); 
