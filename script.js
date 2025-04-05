@@ -12,87 +12,67 @@ document.addEventListener('DOMContentLoaded', function() {
     let lastAppLinkAttempt = 0;
     
     socialLinks.forEach(link => {
-        // Remove target attribute from all links - this prevents automatic new tabs
-        link.removeAttribute('target');
-        
         // For mobile devices with app links
-        if (isMobile && link.dataset.appLink) {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Prevent double clicks/attempts within 2 seconds
-                const now = Date.now();
-                if (now - lastAppLinkAttempt < 2000) {
-                    return;
-                }
-                lastAppLinkAttempt = now;
-                
-                // Get the app link and web link
-                const appLink = link.dataset.appLink;
-                const webLink = link.href;
-                
-                // Special rule for in-app browsers:
-                // If we're already in an app's browser and user is trying to open the SAME platform
-                // For example: Inside Instagram browser, tapping Instagram link
-                // Or inside TikTok browser, tapping TikTok link
-                // We do nothing in these cases because it causes issues
-                if (isInAppBrowser) {
-                    const appName = link.className.replace('social-link', '').trim();
-                    if ((appName === 'instagram' && /Instagram/.test(navigator.userAgent)) ||
-                        (appName === 'twitter' && /Twitter|TWITTER_APP/.test(navigator.userAgent)) ||
-                        (appName === 'facebook' && /FBAN|FBAV|FB_IAB/.test(navigator.userAgent)) ||
-                        (appName === 'tiktok' && /TikTok/.test(navigator.userAgent))) {
-                        console.log(`Inside ${appName} browser, clicking ${appName} link - no action needed`);
+        if (isMobile) {
+            // Remove target attribute to prevent automatic new tabs
+            link.removeAttribute('target');
+            
+            if (link.dataset.appLink) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Prevent double clicks/attempts within 2 seconds
+                    const now = Date.now();
+                    if (now - lastAppLinkAttempt < 2000) {
                         return;
                     }
-                }
-                
-                // If we're in any in-app browser, try to open the app directly WITHOUT redirecting to the web version
-                if (isInAppBrowser) {
-                    // Just try to open the app with no fallback
-                    window.location.href = appLink;
-                    return;
-                }
-                
-                // For standard mobile browsers only: use fallback mechanism
-                if (!isInAppBrowser) {
-                    // Track if the page visibility changes (indicates app opened)
-                    let hasLeftPage = false;
+                    lastAppLinkAttempt = now;
                     
-                    const visibilityHandler = function() {
-                        if (document.visibilityState === 'hidden') {
-                            hasLeftPage = true;
-                            document.removeEventListener('visibilitychange', visibilityHandler);
+                    // Get the app link
+                    const appLink = link.dataset.appLink;
+                    
+                    // Special rule for in-app browsers:
+                    // If we're already in an app's browser and user is trying to open the SAME platform
+                    // For example: Inside Instagram browser, tapping Instagram link
+                    if (isInAppBrowser) {
+                        const appName = link.className.replace('social-link', '').trim();
+                        if ((appName === 'instagram' && /Instagram/.test(navigator.userAgent)) ||
+                            (appName === 'twitter' && /Twitter|TWITTER_APP/.test(navigator.userAgent)) ||
+                            (appName === 'facebook' && /FBAN|FBAV|FB_IAB/.test(navigator.userAgent)) ||
+                            (appName === 'tiktok' && /TikTok/.test(navigator.userAgent))) {
+                            console.log(`Inside ${appName} browser, clicking ${appName} link - no action needed`);
+                            return;
                         }
-                    };
+                    }
                     
-                    // Add visibility change listener
-                    document.addEventListener('visibilitychange', visibilityHandler);
+                    // For ALL mobile browsers (in-app or standard):
+                    // 1. Try to open the app
+                    // 2. Reset the page location to itself after a delay - this cancels any navigation
                     
-                    // Try to open the app
-                    window.location.href = appLink;
+                    // First, open the app with iframe to prevent page navigation
+                    // This trick keeps the page in place and just opens the app
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    document.body.appendChild(iframe);
+                    iframe.src = appLink;
                     
-                    // Only in standard browsers: fallback to web if app doesn't open
-                    // BUT without opening a new tab - use same tab instead
+                    // Give it a bit of time to work
                     setTimeout(function() {
-                        // If page is still visible and we haven't left (app didn't open)
-                        if (!hasLeftPage && document.visibilityState !== 'hidden') {
-                            // Remove our visibility listener
-                            document.removeEventListener('visibilitychange', visibilityHandler);
-                            
-                            // If app didn't open, open web link in SAME tab
-                            window.location.href = webLink;
-                        }
-                    }, 1500);
-                }
-            });
+                        // Remove the iframe
+                        document.body.removeChild(iframe);
+                    }, 100);
+                    
+                    // Now force the page to stay on this page 
+                    // This will cancel any navigation attempt from app links
+                    setTimeout(function() {
+                        // Get the current URL and reload it - much safer approach
+                        window.location.href = window.location.href;
+                    }, 500);
+                });
+            }
         } else {
-            // For desktop and non-app-links, handle click normally
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                // Open in same window for better user experience
-                window.location.href = this.href;
-            });
+            // For desktop, open in new tab
+            link.setAttribute('target', '_blank');
         }
     });
     
