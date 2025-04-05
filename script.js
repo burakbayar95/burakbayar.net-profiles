@@ -12,11 +12,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let lastAppLinkAttempt = 0;
     
     socialLinks.forEach(link => {
-        // Only override clicks for mobile devices with app links available
+        // Remove target attribute from all links - this prevents automatic new tabs
+        link.removeAttribute('target');
+        
+        // For mobile devices with app links
         if (isMobile && link.dataset.appLink) {
-            // Remove any existing target attribute to prevent automatic new tab
-            link.removeAttribute('target');
-            
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 
@@ -73,21 +73,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.location.href = appLink;
                     
                     // Only in standard browsers: fallback to web if app doesn't open
+                    // BUT without opening a new tab - use same tab instead
                     setTimeout(function() {
                         // If page is still visible and we haven't left (app didn't open)
                         if (!hasLeftPage && document.visibilityState !== 'hidden') {
                             // Remove our visibility listener
                             document.removeEventListener('visibilitychange', visibilityHandler);
                             
-                            // If app didn't open, open web link
-                            window.open(webLink, '_blank');
+                            // If app didn't open, open web link in SAME tab
+                            window.location.href = webLink;
                         }
                     }, 1500);
                 }
             });
         } else {
-            // For desktop, just open in new tab
-            link.setAttribute('target', '_blank');
+            // For desktop and non-app-links, handle click normally
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Open in same window for better user experience
+                window.location.href = this.href;
+            });
         }
     });
     
