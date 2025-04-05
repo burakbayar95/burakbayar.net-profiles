@@ -174,7 +174,7 @@ body {
         rgba(255, 255, 255, 0.2), 
         rgba(255, 255, 255, 0));
     transform: skewX(-25deg);
-    animation: linkSweep 3s ease-in-out infinite;
+    animation: linkSweep 6s ease-in-out infinite;
     z-index: 1;
 }
 
@@ -379,7 +379,19 @@ footer {
     }
     
     .social-link::before {
-        animation: none;
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            rgba(255, 255, 255, 0), 
+            rgba(255, 255, 255, 0.2), 
+            rgba(255, 255, 255, 0));
+        transform: skewX(-25deg);
+        animation: linkSweep 6s ease-in-out infinite;
+        z-index: 1;
     }
     
     .social-link:hover {
