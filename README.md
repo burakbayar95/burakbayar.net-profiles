@@ -2,7 +2,6 @@
 
 Bu web sayfası, tüm sosyal medya hesaplarınızı estetik ve etkileyici bir şekilde tek bir yerde toplayan bir kişisel portfolyo sayfasıdır. Modern, şık ve tamamen responsive bir tasarıma sahiptir.
 
-![Screenshot](profile.jpg)
 
 ## Özellikler
 
